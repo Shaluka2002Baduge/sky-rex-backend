@@ -1,81 +1,89 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema(
+const orderItemSchema = new mongoose.Schema(
     {
-        orderID: {
+        productID: {
             type: String,
+            required: true
+        },
+
+        quantity: {
+            type: Number,
             required: true,
-            unique: true
+            min: 1
         },
 
-        items: {
-            type: [
-                {
-                    ProductID: {
-                        type: String,
-                        required: true
-                    },
-
-                    quantity: {
-                        type: Number,
-                        required: true
-                    },
-
-                    name: {
-                        type: String,
-                        required: true
-                    },
-
-                    price: {
-                        type: Number,
-                        required: true
-                    },
-
-                    image: {
-                        type: String,
-                        required: true
-                    }
-                }
-            ]
-        },
-
-        customerName: {
+        name: {
             type: String,
             required: true
         },
 
-        email: {
-            type: String,
+        price: {
+            type: Number,
             required: true
         },
 
-        phone: {
+        image: {
             type: String,
-            required: true
-        },
-
-        address: {
-            type: String,
-            required: true
-        },
-
-        total: {
-            type: String,
-            required: true
-        },
-
-        status: {
-            type: String,
-            required: true,
-            default: "pending"
-        },
-
-        date: {
-            type: Date,
-            default: Date.now
+            default: ""
         }
+    },
+    {
+        _id: false
     }
 );
+
+
+const orderSchema = new mongoose.Schema({
+
+    orderID: {
+        type: String,
+        required: true,
+        unique: true
+    },
+
+    items: {
+        type: [orderItemSchema],
+        required: true
+    },
+
+    customerName: {
+        type: String,
+        required: true
+    },
+
+    email: {
+        type: String,
+        required: true
+    },
+
+    phone: {
+        type: String,
+        default: "Not provided"
+    },
+
+    address: {
+        type: String,
+        required: true
+    },
+
+    total: {
+        type: Number,
+        required: true
+    },
+
+    date: {
+        type: Date,
+        default: Date.now
+    },
+
+    status: {
+        type: String,
+        default: "Pending"
+    }
+
+});
+
 
 const Order = mongoose.model("Order", orderSchema);
 
