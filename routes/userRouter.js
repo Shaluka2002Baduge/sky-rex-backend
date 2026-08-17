@@ -8,7 +8,9 @@ import {
     getUser,
     googleLogin,
     loginUser,
-    sendOTP
+    sendOTP,
+    updatePassword,
+    updateUserData
 } from "../controllers/userController.js";
 
 
@@ -45,6 +47,10 @@ userRouter.get("/send-otp/:email", sendOTP);
 
 // Change Password
 userRouter.post("/change-password", changePasswordViaOTP);
+
+userRouter.put("/me", updateUserData);
+
+userRouter.put("/me/password", updatePassword);
 
 
 export default userRouter;

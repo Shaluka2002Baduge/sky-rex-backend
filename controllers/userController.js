@@ -607,23 +607,75 @@ export function isCustomer(req) {
 // GET CURRENT USER
 // ========================================
 
-export function getUser(req, res) {
+export async function getUser(req, res) {
 
     if (req.user == null) {
 
         return res.status(401).json({
-
-            message:
-                "Unauthorized"
-
+            message: "Unauthorized"
         });
 
     }
 
 
-    return res.json(
-        req.user
-    );
+    try {
+
+        // Get latest information directly
+        // from MongoDB instead of old JWT data
+        const user = await User.findOne({
+            email: req.user.email
+        }).select("-password");
+
+
+        if (user == null) {
+
+            return res.status(404).json({
+                message: "User not found"
+            });
+
+        }
+
+
+        return res.status(200).json({
+
+            email:
+                user.email,
+
+            firstName:
+                user.firstName,
+
+            lastName:
+                user.lastName,
+
+            role:
+                user.role,
+
+            isEmailVerified:
+                user.isEmailVerified,
+
+            image:
+                user.image,
+
+            isBlock:
+                user.isBlock
+
+        });
+
+
+    } catch (err) {
+
+        console.error(
+            "Get current user error:",
+            err
+        );
+
+
+        return res.status(500).json({
+            message:
+                "Failed to get user"
+        });
+
+    }
 
 }
 
@@ -1742,6 +1794,159 @@ export async function changePasswordViaOTP(req, res) {
 
             message:
                 "Failed to change password"
+
+        });
+
+    }
+
+}
+
+
+
+// ========================================
+// UPDATE USER DATA
+// ========================================
+
+export async function updateUserData(req, res) {
+
+    if (req.user == null) {
+
+        return res.status(401).json({
+            message: "Unauthorized"
+        });
+
+    }
+
+
+    try {
+
+        const updateData = {
+
+            firstName:
+                req.body.firstName,
+
+            lastName:
+                req.body.lastName
+
+        };
+
+
+        // Only change image if the
+        // frontend actually sends one
+        if (req.body.image !== undefined) {
+
+            updateData.image =
+                req.body.image;
+
+        }
+
+
+        await User.updateOne(
+            {
+                email:
+                    req.user.email
+            },
+            updateData
+        );
+
+
+        return res.status(200).json({
+
+            message:
+                "User data updated successfully"
+
+        });
+
+
+    } catch (err) {
+
+        console.error(
+            "Update user data error:",
+            err
+        );
+
+
+        return res.status(500).json({
+
+            message:
+                "Failed to update user data"
+
+        });
+
+    }
+
+}
+
+
+
+// ========================================
+// UPDATE PASSWORD
+// ========================================
+
+export async function updatePassword(req, res) {
+
+    if (req.user == null) {
+
+        return res.status(401).json({
+            message: "Unauthorized"
+        });
+
+    }
+
+
+    try {
+
+        if (!req.body.password) {
+
+            return res.status(400).json({
+
+                message:
+                    "Password is required"
+
+            });
+
+        }
+
+
+        const hashedPassword =
+            bcrypt.hashSync(
+                req.body.password,
+                10
+            );
+
+
+        await User.updateOne(
+            {
+                email:
+                    req.user.email
+            },
+            {
+                password:
+                    hashedPassword
+            }
+        );
+
+
+        return res.status(200).json({
+
+            message:
+                "Password updated successfully"
+
+        });
+
+
+    } catch (err) {
+
+        console.error(
+            "Update password error:",
+            err
+        );
+
+
+        return res.status(500).json({
+
+            message:
+                "Failed to update password"
 
         });
 
